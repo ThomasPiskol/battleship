@@ -9,13 +9,12 @@ namespace Network
     {
         private SsdpDevicePublisher m_Publisher;
 
-        private IStorageManager m_StorageManager;
+        private readonly IStorageManager m_StorageManager;
 
-        private SimpleHTTPServer m_HTTPServer;
+        private readonly SimpleHTTPServer m_HTTPServer;
 
         public PublishServer() : this(new StorageManager())
-        {        
-            
+        {
         }
 
         public PublishServer(IStorageManager storageManager)

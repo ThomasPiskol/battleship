@@ -12,7 +12,7 @@ namespace Network
 
         public delegate void DeviceFoundEventHandler(object sender, DeviceFoundEventArgs args);
 
-        public event DeviceFoundEventHandler DeviceFoundEvent;
+        public event EventHandler<DeviceFoundEventArgs> DeviceFoundEvent;
 
         // Call this method from somewhere in your code to start the search.
         public void BeginSearch()
@@ -32,7 +32,7 @@ namespace Network
 
             // Perform a search so we don't have to wait for devices to broadcast notifications 
             // again to get any results right away (notifications are broadcast periodically).
-            m_DeviceLocator.SearchAsync();            
+            m_DeviceLocator.SearchAsync();
         }
 
         public void EndSearch()
@@ -44,11 +44,10 @@ namespace Network
 
             m_DeviceLocator.DeviceAvailable -= deviceLocator_DeviceAvailable;
             m_DeviceLocator.StopListeningForNotifications();
-
         }
 
         // Process each found device in the event handler
-        async void deviceLocator_DeviceAvailable(object sender, DeviceAvailableEventArgs e)
+        private async void deviceLocator_DeviceAvailable(object sender, DeviceAvailableEventArgs e)
         {
             if(DeviceFoundEvent == null)
             {
@@ -60,15 +59,14 @@ namespace Network
             //Can retrieve the full device description easily though.
             try
             {
-                SsdpDevice fullDevice = await e.DiscoveredDevice.GetDeviceInfo();
+                SsdpDevice fullDevice = await e.DiscoveredDevice.GetDeviceInfo().ConfigureAwait(false);
             }
             catch(Exception ex)
             {
                 // ToDo: Error Handling
                 return;
             }
-            
-            
+
             DeviceFoundEventArgs eventArgs = new DeviceFoundEventArgs();
             eventArgs.Usn = e.DiscoveredDevice.Usn;
             eventArgs.DescriptionLocation = e.DiscoveredDevice.DescriptionLocation.ToString();
@@ -76,6 +74,5 @@ namespace Network
 
             DeviceFoundEvent(this, eventArgs);
         }
-
     }
 }
